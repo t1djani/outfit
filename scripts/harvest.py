@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""harvest.py — deterministic evidence collector for outfit.
+
+Gathers raw material about a project so the agent does not burn context
+re-listing it. It DECIDES NOTHING: no classification, no domain inference.
+Output is a markdown evidence dossier on stdout.
+
+Usage: python3 scripts/harvest.py [root]   # root defaults to "."
+"""
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+NOISE_DIRS = {
+    ".git", "node_modules", ".venv", "venv", "__pycache__", "dist", "build",
+    ".next", ".turbo", "target", ".idea", ".vscode", "coverage", ".pytest_cache",
+    ".mypy_cache", ".ruff_cache", "vendor", ".cache",
+}
+MAX_ENTRIES = 400  # cap tree size so harvest stays bounded
+
+
+def build_tree(root, max_depth=3):
+    """Return a newline-joined indented tree, skipping noise dirs, depth-bounded."""
+    root = Path(root)
+    lines = []
+    count = 0
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = sorted(d for d in dirnames if d not in NOISE_DIRS)
+        rel = Path(dirpath).relative_to(root)
+        depth = 0 if str(rel) == "." else len(rel.parts)
+        if depth > max_depth:
+            dirnames[:] = []
+            continue
+        indent = "  " * depth
+        if str(rel) != ".":
+            lines.append(f"{indent}{rel.parts[-1]}/")
+        for name in sorted(filenames):
+            count += 1
+            if count > MAX_ENTRIES:
+                lines.append(f"{indent}  … (truncated at {MAX_ENTRIES} files)")
+                return "\n".join(lines)
+            lines.append(f"{indent}  {name}")
+    return "\n".join(lines)
