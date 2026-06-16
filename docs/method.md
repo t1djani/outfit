@@ -5,14 +5,15 @@ outfit equips a repo with Claude Code capabilities (skills and agents) tailored 
 ## Deterministic at the ends, intelligent in the middle
 
 ```
-harvest (script)  →  recon (you)  →  propose + pick (you + user)  →  forge + validate (you + script)
-   decides nothing     all the inference        the human chooses          form check only
+harvest (script) → recon (you) → propose + pick (you + user) → forge + validate (you + script) → register (you + user)
+  decides nothing    the inference        the human chooses           form check only              index in CLAUDE.md
 ```
 
 - **harvest** (`scripts/harvest.py`, standard library) gathers raw material — tree, key files, git, docs, detected resources — and *classifies nothing*. It exists so the agent does not burn context re-listing the repo.
 - **recon** is the whole point. The agent reads for meaning, **probes the tools actually connected this session** (a tracker MCP — Linear, Jira, Notion; a database; docs servers), dives the code on the threads that matter, and **infers the domain**. None of this is pattern-matching; it is reasoning over evidence.
 - **propose** turns recon into capabilities, each carrying its evidence. Anything without evidence is dropped or marked `speculative`. The user multi-selects.
 - **forge** writes the chosen drafts; `validate-draft.sh` checks their *form* (frontmatter, name, description) — never their quality, which stays human.
+- **register** places each draft in its home (`.claude/skills/`, `.claude/agents/`, or the root recon identified) and **indexes the new kit in CLAUDE.md / AGENTS.md** so the project announces its capabilities. Idempotent, and the CLAUDE.md edit is shown as a diff and confirmed before it lands — a written-but-unannounced skill is a stranded skill.
 
 ## Why grounding is the moat
 

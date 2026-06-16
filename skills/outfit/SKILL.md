@@ -13,7 +13,7 @@ The failure this prevents: a generic scaffolder that keyword-matches a stack and
 
 ## Procedure
 
-Drive it as a TodoWrite checklist so the user watches it work: one todo per beat (harvest, recon, propose, forge).
+Drive it as a TodoWrite checklist so the user watches it work: one todo per beat (harvest, recon, propose, forge, register).
 
 ### Beat 1 — Harvest (cheap, decides nothing)
 
@@ -70,13 +70,24 @@ Then check the form of each draft:
 bash "${CLAUDE_PLUGIN_ROOT}/hooks/validate-draft.sh" <path-to-draft>
 ```
 
-It verifies structure only (frontmatter, kebab `name`, non-empty `description`). Quality stays your call and the user's. Report what was written and remind the user the drafts are starting points to edit.
+It verifies structure only (frontmatter, kebab `name`, non-empty `description`). Quality stays your call and the user's.
+
+### Beat 5 — Register the kit (point it where the project looks)
+
+A written draft is discoverable but not *announced*. Claude Code auto-discovers `.claude/skills/` and `.claude/agents/`, so the files already work — but a project keeps a human-readable index of its capabilities, and that index is where conventions and routing point. Finish by wiring the new kit in:
+
+- **Place each file in its home.** Default to the project's `.claude/skills/<name>/SKILL.md` and `.claude/agents/<name>.md`. If the project clearly uses another root (a plugin layout, a monorepo package's own `.claude/`, a custom skills dir referenced in CLAUDE.md), put it there instead — recon told you which.
+- **Index them where the project documents its tooling.** Find the agent-instructions file the harvest surfaced — `CLAUDE.md`, else `AGENTS.md`/`GEMINI.md`. If it has a toolchain/skills/capabilities section, add one line per new capability (name + its one-line "use when"); if not, add a short `## Skills & agents` section. Keep it **idempotent** — never duplicate an entry that is already there. Match the file's existing voice and format.
+- **Show the diff and get a yes before writing to CLAUDE.md.** That file is load-bearing and usually tracked. Propose the exact lines; write only after the user confirms (same rule as the proposals — the user chooses).
+
+Then report what was written, where each file landed, what was added to the index, and that the drafts are starting points to edit.
 
 ## Rules
 
 - **The deterministic layer never decides.** harvest gathers; the hook checks form. The domain inference is yours.
 - **No proposal without evidence.** Grounded or `speculative` — never silent invention.
 - **The user multi-selects.** Nothing is written outside the selection.
+- **Register, don't strand.** Finish by placing each capability in its home and indexing it in the project's instructions file — but show the CLAUDE.md diff and get a yes first. Keep the index idempotent.
 - **Probe, don't assume.** Detect the tools that are actually there and adapt (Linear vs Jira…). No hardcoded stack list.
 - **Reuse the existing** (servo manifest, roster, memory, current skills) as evidence; don't re-derive or duplicate.
 - **Know when not to run.** If the user already knows the one skill they want, that is `writing-skills`, not outfit. If they want a servo manifest specifically, that is `scan-project`.

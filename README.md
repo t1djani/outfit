@@ -43,13 +43,16 @@ outfit infers the domain by *reading*: the roadmap, the memory, the conventions 
 - **It adapts to the tools you have.** Linear or Jira or Notion; Postgres or Mongo; context7 or not — outfit detects what's wired and proposes accordingly. There is no hardcoded stack list to go stale.
 - **You choose.** Proposals come as a multi-select. outfit writes nothing until you've picked, and never auto-activates anything beyond writing an editable draft.
 - **It reuses what's already there.** A `.servo/manifest.yaml`, a war-room roster, existing `.claude/skills` — outfit reads them as evidence instead of duplicating them.
+- **It wires the kit in, not just down.** After writing the drafts, outfit indexes them in your CLAUDE.md / AGENTS.md so the project announces its new capabilities — idempotent, and only after you OK the diff.
 
-## The four beats
+## The five beats
 
 ```
-harvest (script)  →  recon (AI)  →  propose + you pick  →  forge + validate (AI + script)
-  decides nothing      the inference      multi-select          editable drafts, form-checked
+harvest (script) → recon (AI) → propose + you pick → forge + validate → register
+  decides nothing    inference     multi-select      editable drafts    index in CLAUDE.md
 ```
+
+The last beat matters: outfit doesn't strand the files it writes. It places each capability in its home and **indexes the new kit in your CLAUDE.md / AGENTS.md** so the project actually announces what it now has — showing you the diff and asking before it touches CLAUDE.md.
 
 See [docs/method.md](docs/method.md) for the full method and a real evidence sample in [examples/](examples/).
 
@@ -64,7 +67,7 @@ See [docs/method.md](docs/method.md) for the full method and a real evidence sam
 ```
 outfit/
 ├── .claude-plugin/{plugin.json, marketplace.json}
-├── skills/outfit/      # the four-beat orchestration — markdown, the core
+├── skills/outfit/      # the five-beat orchestration — markdown, the core
 ├── commands/           # /outfit [thorough]
 ├── scripts/            # harvest.py — deterministic evidence collector (stdlib)
 ├── hooks/              # validate-draft.sh — form check on generated drafts
@@ -92,4 +95,5 @@ Early days. Issues and ideas welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] **recon** · AI infers the domain by reading + probing connected tools.
 - [x] **grounded proposals** · every skill/agent carries its evidence; you multi-select.
 - [x] **forge + form-check** · writes editable drafts, validated for structure.
+- [x] **register** · places each capability in its home and indexes it in CLAUDE.md / AGENTS.md (idempotent, diff-confirmed).
 - [ ] **`--refresh`** · revisit an equipped repo and propose updates to the existing kit.

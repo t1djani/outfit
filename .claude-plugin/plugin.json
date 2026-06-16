@@ -3,7 +3,7 @@
   "name": "outfit",
   "displayName": "outfit",
   "description": "Read a project and propose the skills and agents it actually needs. outfit infers what your repo IS, then drafts tailored Claude Code skills/agents you pick from — grounded in real evidence, never generic.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": { "name": "t1djani" },
   "homepage": "https://github.com/t1djani/outfit",
   "repository": "https://github.com/t1djani/outfit",
