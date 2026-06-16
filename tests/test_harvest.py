@@ -82,3 +82,36 @@ def test_detect_resources_flags_known_artifacts():
         assert ".servo/manifest.yaml" in res
         assert ".mcp.json" in res
         assert ".claude/skills" in res
+
+
+def test_main_emits_all_sections():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "README.md").write_text("# Demo\n")
+        (root / "src").mkdir()
+        (root / "src" / "app.py").write_text("x=1\n")
+        out = harvest.render(root)
+        for header in [
+            "# outfit · evidence dossier",
+            "## TREE",
+            "## KEY FILES",
+            "## GIT",
+            "## DOCS",
+            "## RESOURCES",
+            "## NEXT",
+        ]:
+            assert header in out
+        # NEXT must remind the reader that decisions are the agent's job
+        assert "decides nothing" in out.lower()
+
+
+def test_script_runs_as_subprocess():
+    with tempfile.TemporaryDirectory() as tmp:
+        (Path(tmp) / "README.md").write_text("# Demo\n")
+        script = Path(__file__).resolve().parent.parent / "scripts" / "harvest.py"
+        r = subprocess.run(
+            [sys.executable, str(script), tmp],
+            capture_output=True, text=True, timeout=30,
+        )
+        assert r.returncode == 0
+        assert "# outfit · evidence dossier" in r.stdout

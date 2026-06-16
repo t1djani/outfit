@@ -119,3 +119,57 @@ def detect_resources(root):
     """Return the subset of known resource paths that exist."""
     root = Path(root)
     return [r for r in RESOURCE_PATHS if (root / r).exists()]
+
+
+def render(root):
+    """Assemble the full markdown evidence dossier (decides nothing)."""
+    root = Path(root)
+    parts = []
+    parts.append("# outfit · evidence dossier")
+    parts.append(
+        "_Raw material only. This file CLASSIFIES NOTHING and INFERS NOTHING — "
+        "the agent reads it, probes live tools, and decides what the project needs._\n"
+    )
+
+    parts.append("## TREE")
+    parts.append("```\n" + build_tree(root) + "\n```")
+
+    parts.append("## KEY FILES")
+    key = read_key_files(root)
+    if not key:
+        parts.append("_none of the known manifests/readmes are present._")
+    for name, content in key:
+        parts.append(f"### {name}\n```\n{content}\n```")
+
+    parts.append("## GIT")
+    parts.append("```\n" + git_summary(root) + "\n```")
+
+    parts.append("## DOCS")
+    docs = find_docs(root)
+    parts.append("\n".join(f"- {d}" for d in docs) if docs else "_no doc dirs found._")
+
+    parts.append("## RESOURCES")
+    res = detect_resources(root)
+    if res:
+        parts.append("\n".join(f"- {r}" for r in res))
+    else:
+        parts.append("_no servo manifest, MCP config, or .claude assets detected._")
+
+    parts.append("## NEXT")
+    parts.append(
+        "This harvest DECIDES NOTHING. Now do the recon: read these files for meaning, "
+        "follow the roadmap, probe which MCP servers / CLIs / docs you actually have, "
+        "infer the domain, then propose grounded skills/agents for the user to pick."
+    )
+    return "\n\n".join(parts) + "\n"
+
+
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    root = argv[0] if argv else "."
+    sys.stdout.write(render(root))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
