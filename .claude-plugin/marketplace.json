@@ -1,0 +1,12 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "outfit",
+  "owner": { "name": "t1djani" },
+  "plugins": [
+    {
+      "name": "outfit",
+      "source": ".",
+      "description": "Read a project and propose the skills and agents it actually needs — grounded in real evidence, never generic."
+    }
+  ]
+}
