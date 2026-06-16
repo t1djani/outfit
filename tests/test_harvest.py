@@ -48,3 +48,37 @@ def test_read_key_files_returns_present_manifests_bounded():
         suffix = "\n… (truncated)".encode("utf-8")
         for _, content in found:
             assert len(content.encode("utf-8")) <= 40 + len(suffix)
+
+
+def test_git_summary_handles_non_git_dir():
+    with tempfile.TemporaryDirectory() as tmp:
+        # not a git repo
+        summary = harvest.git_summary(Path(tmp))
+        assert "no git history" in summary.lower()
+
+
+def test_find_docs_lists_markdown_under_docs():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "docs").mkdir()
+        (root / "docs" / "guide.md").write_text("guide\n")
+        (root / "docs" / "deep").mkdir()
+        (root / "docs" / "deep" / "spec.md").write_text("spec\n")
+        docs = harvest.find_docs(root)
+        joined = "\n".join(docs)
+        assert "guide.md" in joined
+        assert "spec.md" in joined
+
+
+def test_detect_resources_flags_known_artifacts():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".servo").mkdir()
+        (root / ".servo" / "manifest.yaml").write_text("experts: []\n")
+        (root / ".mcp.json").write_text('{"mcpServers":{"linear":{}}}\n')
+        (root / ".claude").mkdir()
+        (root / ".claude" / "skills").mkdir()
+        res = harvest.detect_resources(root)
+        assert ".servo/manifest.yaml" in res
+        assert ".mcp.json" in res
+        assert ".claude/skills" in res

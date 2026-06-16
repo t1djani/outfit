@@ -67,3 +67,55 @@ def read_key_files(root, max_bytes=4000):
             text += "\n… (truncated)"
         out.append((name, text))
     return out
+
+
+def git_summary(root, n=30):
+    """Recent commit subjects + top-level dirs, or a clear 'no git' note."""
+    root = Path(root)
+    if not (root / ".git").exists():
+        return "no git history found"
+    try:
+        log = subprocess.run(
+            ["git", "-C", str(root), "log", "--oneline", "-n", str(n)],
+            capture_output=True, text=True, timeout=10,
+        )
+        if log.returncode != 0:
+            return "no git history found"
+        return log.stdout.strip() or "no git history found"
+    except (OSError, subprocess.SubprocessError):
+        return "no git history found"
+
+
+# directories that signal where docs/specs live
+DOC_DIRS = ["docs", "doc", "documentation", "specs", "rfcs", "adr"]
+
+
+def find_docs(root, limit=80):
+    """Relative paths of markdown/rst files under common doc dirs."""
+    root = Path(root)
+    out = []
+    for d in DOC_DIRS:
+        base = root / d
+        if not base.is_dir():
+            continue
+        for p in sorted(base.rglob("*")):
+            if p.suffix.lower() in (".md", ".rst", ".mdx") and p.is_file():
+                out.append(str(p.relative_to(root)))
+                if len(out) >= limit:
+                    return out
+    return out
+
+
+# artifacts outfit reuses as evidence (memory, manifests, capabilities)
+RESOURCE_PATHS = [
+    ".servo/manifest.yaml", ".war-room/roster.yaml", ".mcp.json",
+    ".claude/settings.json", ".claude/settings.local.json",
+    ".claude/skills", ".claude/agents", ".claude/CLAUDE.md",
+    ".cursor", ".github/workflows",
+]
+
+
+def detect_resources(root):
+    """Return the subset of known resource paths that exist."""
+    root = Path(root)
+    return [r for r in RESOURCE_PATHS if (root / r).exists()]
