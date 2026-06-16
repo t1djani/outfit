@@ -42,3 +42,28 @@ def build_tree(root, max_depth=3):
                 return "\n".join(lines)
             lines.append(f"{indent}  {name}")
     return "\n".join(lines)
+
+
+KEY_FILES = [
+    "CLAUDE.md", "AGENTS.md", "GEMINI.md", "README.md", "README.rst",
+    "package.json", "pyproject.toml", "setup.py", "requirements.txt",
+    "go.mod", "Cargo.toml", "Gemfile", "composer.json", "pom.xml",
+    "build.gradle", "Makefile", "docker-compose.yml", "Dockerfile",
+    "tsconfig.json", ".tool-versions",
+]
+
+
+def read_key_files(root, max_bytes=4000):
+    """Return [(name, content)] for present key files, each byte-bounded."""
+    root = Path(root)
+    out = []
+    for name in KEY_FILES:
+        p = root / name
+        if not p.is_file():
+            continue
+        raw = p.read_bytes()[:max_bytes]
+        text = raw.decode("utf-8", errors="replace")
+        if p.stat().st_size > max_bytes:
+            text += "\n… (truncated)"
+        out.append((name, text))
+    return out
